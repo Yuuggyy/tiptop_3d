@@ -1,6 +1,7 @@
 -- ============================================
 -- RLS UNIVERSEL — Ouvre TOUT sauf gestion admin produits
 -- À exécuter dans Supabase > SQL Editor
+-- (Script 100% rejouable plusieurs fois sans erreur)
 -- ============================================
 -- Ce script garantit que:
 -- ✅ Un client NON connecté peut:
@@ -22,6 +23,10 @@ ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "lecture_publique_categories" ON public.categories;
 DROP POLICY IF EXISTS "admin_all_categories" ON public.categories;
+DROP POLICY IF EXISTS "categories_select_all" ON public.categories;
+DROP POLICY IF EXISTS "categories_insert_admin" ON public.categories;
+DROP POLICY IF EXISTS "categories_update_admin" ON public.categories;
+DROP POLICY IF EXISTS "categories_delete_admin" ON public.categories;
 
 -- Tout le monde peut lire
 CREATE POLICY "categories_select_all" ON public.categories FOR SELECT USING (true);
@@ -41,6 +46,10 @@ ALTER TABLE public.produits ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "lecture_publique_produits" ON public.produits;
 DROP POLICY IF EXISTS "admin_all_produits" ON public.produits;
+DROP POLICY IF EXISTS "produits_select_all" ON public.produits;
+DROP POLICY IF EXISTS "produits_insert_admin" ON public.produits;
+DROP POLICY IF EXISTS "produits_update_admin" ON public.produits;
+DROP POLICY IF EXISTS "produits_delete_admin" ON public.produits;
 
 -- Tout le monde peut lire
 CREATE POLICY "produits_select_all" ON public.produits FOR SELECT USING (true);
@@ -62,6 +71,9 @@ DROP POLICY IF EXISTS "insertion_commandes" ON public.commandes;
 DROP POLICY IF EXISTS "admin_read_commandes" ON public.commandes;
 DROP POLICY IF EXISTS "admin_update_commandes" ON public.commandes;
 DROP POLICY IF EXISTS "admin_all_commandes" ON public.commandes;
+DROP POLICY IF EXISTS "commandes_insert_all" ON public.commandes;
+DROP POLICY IF EXISTS "commandes_select_admin" ON public.commandes;
+DROP POLICY IF EXISTS "commandes_update_admin" ON public.commandes;
 
 -- Tout le monde peut créer des commandes (clients anonymes)
 CREATE POLICY "commandes_insert_all" ON public.commandes FOR INSERT WITH CHECK (true);
@@ -80,6 +92,8 @@ ALTER TABLE public.commande_items ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "insertion_items" ON public.commande_items;
 DROP POLICY IF EXISTS "admin_read_items" ON public.commande_items;
 DROP POLICY IF EXISTS "admin_all_items" ON public.commande_items;
+DROP POLICY IF EXISTS "items_insert_all" ON public.commande_items;
+DROP POLICY IF EXISTS "items_select_admin" ON public.commande_items;
 
 -- Tout le monde peut créer des items de commande
 CREATE POLICY "items_insert_all" ON public.commande_items FOR INSERT WITH CHECK (true);
@@ -97,6 +111,9 @@ DROP POLICY IF EXISTS "insertion_appel" ON public.appels_serveur;
 DROP POLICY IF EXISTS "admin_read_appels" ON public.appels_serveur;
 DROP POLICY IF EXISTS "admin_update_appels" ON public.appels_serveur;
 DROP POLICY IF EXISTS "admin_all_appels" ON public.appels_serveur;
+DROP POLICY IF EXISTS "appels_insert_all" ON public.appels_serveur;
+DROP POLICY IF EXISTS "appels_select_admin" ON public.appels_serveur;
+DROP POLICY IF EXISTS "appels_update_admin" ON public.appels_serveur;
 
 -- Tout le monde peut appeler le serveur
 CREATE POLICY "appels_insert_all" ON public.appels_serveur FOR INSERT WITH CHECK (true);
@@ -129,6 +146,8 @@ CREATE POLICY "parametres_update_admin" ON public.parametres FOR UPDATE
 ALTER TABLE public.admin_profiles ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "admin_profiles_policy" ON public.admin_profiles;
+DROP POLICY IF EXISTS "admin_profiles_select_own" ON public.admin_profiles;
+DROP POLICY IF EXISTS "admin_profiles_update_own" ON public.admin_profiles;
 
 CREATE POLICY "admin_profiles_select_own" ON public.admin_profiles FOR SELECT
   USING (auth.role() = 'service_role' OR auth.uid() = id);
@@ -168,4 +187,4 @@ DROP POLICY IF EXISTS "menu_images_delete_admin" ON storage.objects;
 CREATE POLICY "menu_images_delete_admin" ON storage.objects FOR DELETE
   USING (bucket_id = 'menu-images' AND (auth.role() = 'service_role' OR auth.uid() IN (SELECT id FROM public.admin_profiles)));
 
-SELECT 'RLS universel configuré ✅ — Clients anonymes peuvent commander et appeler le serveur. Admin gère les produits.' AS status;
+SELECT 'RLS universel configuré OK - Clients anonymes peuvent commander et appeler le serveur. Admin gere les produits.' AS status;
